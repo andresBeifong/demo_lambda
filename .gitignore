@@ -23,4 +23,6 @@
 hs_err_pid*
 replay_pid*
 /solutions/task01/target/
-/solutions/syndicate_venv/
+/solutions/task02/target/
+/syndicate_venv/
+/solutions/task02/.idea/
