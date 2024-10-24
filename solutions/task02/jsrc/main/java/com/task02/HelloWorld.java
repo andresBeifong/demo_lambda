@@ -42,7 +42,7 @@ import java.util.Map;
 public class HelloWorld implements RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
     private static final int STATUS_CODE_OK = 200;
-    private static final int STATUS_CODE_NOT_FOUND = 404;
+    private static final int STATUS_CODE_BAD_REQUEST = 400;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final Map<String, String> responseHeaders = Map.of("Content-Type", "application/json");
 
@@ -53,7 +53,7 @@ public class HelloWorld implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
         if ("/hello".equals(getPath(requestEvent)) && "GET".equals(getMethod(requestEvent))) {
             return buildResponse(STATUS_CODE_OK, new Response(STATUS_CODE_OK, "Hello from Lambda"));
         }
-        return buildResponse(STATUS_CODE_NOT_FOUND, new Response(404, "Bad request syntax or unsupported method. Request path: " + requestPath + ". HTTP method: " + requestMethod));
+        return buildResponse(STATUS_CODE_BAD_REQUEST, new Response(404, "Bad request syntax or unsupported method. Request path: " + requestPath + ". HTTP method: " + requestMethod));
     }
 
     private APIGatewayV2HTTPResponse buildResponse(int statusCode, Response body) {
