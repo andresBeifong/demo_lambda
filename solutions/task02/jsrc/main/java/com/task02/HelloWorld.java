@@ -53,7 +53,7 @@ public class HelloWorld implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
         if ("/hello".equals(getPath(requestEvent)) && "GET".equals(getMethod(requestEvent))) {
             return buildResponse(STATUS_CODE_OK, new Response(STATUS_CODE_OK, "Hello from Lambda"));
         }
-        return buildResponse(STATUS_CODE_BAD_REQUEST, new Response(404, "Bad request syntax or unsupported method. Request path: " + requestPath + ". HTTP method: " + requestMethod));
+        return buildResponse(STATUS_CODE_BAD_REQUEST, new Response(STATUS_CODE_BAD_REQUEST, "Bad request syntax or unsupported method. Request path: " + requestPath + ". HTTP method: " + requestMethod));
     }
 
     private APIGatewayV2HTTPResponse buildResponse(int statusCode, Response body) {
