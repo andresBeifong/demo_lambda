@@ -23,7 +23,6 @@ import java.util.Map;
 public class SnsHandler implements RequestHandler<SNSEvent ,Void> {
 
 	public Void handleRequest(SNSEvent snsEvent, Context context) {
-		System.out.println("Hello from lambda");
 		LambdaLogger logger = context.getLogger();
 		for(SNSEvent.SNSRecord record : snsEvent.getRecords()){
 			logger.log(record.getSNS().getMessage());
