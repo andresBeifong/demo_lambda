@@ -1,0 +1,98 @@
+{
+  "lambda-basic-execution": {
+    "policy_content": {
+      "Statement": [
+        {
+          "Action": [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+            "dynamodb:GetItem",
+            "dynamodb:Query",
+            "dynamodb:PutItem",
+            "dynamodb:Batch*",
+            "dynamodb:DeleteItem",
+            "ssm:PutParameter",
+            "ssm:GetParameter",
+            "kms:Decrypt"
+          ],
+          "Effect": "Allow",
+          "Resource": "*"
+        }
+      ],
+      "Version": "2012-10-17"
+    },
+    "resource_type": "iam_policy",
+    "tags": {}
+  },
+  "sqs-custom-role": {
+    "policy_content": {
+      "Statement": [
+        {
+          "Action": [
+            "sqs:ReceiveMessage",
+            "sqs:DeleteMessage",
+            "sqs:GetQueueAttributes",
+            "lambda:CreateEventSourceMapping"
+          ],
+          "Effect": "Allow",
+          "Resource": "*"
+        }
+      ],
+      "Version": "2012-10-17"
+    },
+    "resource_type": "iam_policy",
+    "tags": {}
+  },
+  "sns-custom-role": {
+    "policy_content": {
+      "Statement": [
+        {
+          "Action": [
+            "sns:Subscribe",
+            "lambda:AddPermission"
+          ],
+          "Effect": "Allow",
+          "Resource": "*"
+        }
+      ],
+      "Version": "2012-10-17"
+    },
+    "resource_type": "iam_policy",
+    "tags": {}
+  },
+  "sqs_handler-role": {
+    "predefined_policies": [
+      "AWSLambdaSQSQueueExecutionRole"
+    ],
+    "principal_service": "lambda",
+    "custom_policies": [
+      "lambda-basic-execution",
+      "sqs-custom-role"
+    ],
+    "resource_type": "iam_role",
+    "tags": {}
+  },
+  "async_queue": {
+    "resource_type": "sqs_queue",
+    "fifo_queue": false,
+    "region": "eu-central-1",
+    "visibility_timeout": 300
+  },
+  "sns_handler-role": {
+    "predefined_policies": [],
+    "principal_service": "lambda",
+    "custom_policies": [
+      "lambda-basic-execution",
+      "sns-custom-role"
+    ],
+    "resource_type": "iam_role",
+    "tags": {}
+  },
+  "lambda_topic": {
+    "resource_type": "sns_topic",
+    "region": "eu-central-1",
+    "event_sources": [],
+    "tags": {}
+  }
+}
