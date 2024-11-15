@@ -1,6 +1,7 @@
 package com.task05;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
@@ -35,14 +36,18 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
     private static final DynamoDbClient dynamoDB = DynamoDbClient.builder().region(Region.EU_CENTRAL_1).build();
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+        LambdaLogger logger = context.getLogger();
+
         String requestBody = request.getBody();
+        logger.log("Request body: " + requestBody);
+
         EventData eventData = gson.fromJson(requestBody, EventData.class);
         eventData.setId(UUID.randomUUID().toString());
         eventData.setCreatedAt(ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
         Map<String, AttributeValue> eventItem = new HashMap<>();
         eventItem.put("id", AttributeValue.builder().s(eventData.getId()).build());
-        eventItem.put("principalId", AttributeValue.builder().s(eventData.getPrincipalId()).build());
+        eventItem.put("principalId", AttributeValue.builder().n(eventData.getPrincipalId().toString()).build());
         eventItem.put("content", toDynamoDBMap(eventData.getContent()));
         eventItem.put("createdAt", AttributeValue.builder().s(eventData.getCreatedAt()).build());
 
@@ -51,7 +56,7 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
         try {
             dynamoDB.putItem(eventItemRequest);
         } catch (DynamoDbException ex) {
-            context.getLogger().log("An error occurred when saving Event to DynamoDB: " + ex.getMessage());
+            logger.log("An error occurred when saving Event to DynamoDB: " + ex.getMessage());
             throw ex;
         }
 
@@ -78,7 +83,7 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 
     class EventData {
         private String id;
-        private String principalId;
+        private Integer principalId;
         private Content content;
         private String createdAt;
 
@@ -87,7 +92,7 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
             this.createdAt = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
 
-        public EventData(String id, String principalId, Content content, String createdAt) {
+        public EventData(String id, Integer principalId, Content content, String createdAt) {
             this.id = id;
             this.principalId = principalId;
             this.content = content;
@@ -102,11 +107,11 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
             this.id = id;
         }
 
-        public String getPrincipalId() {
+        public Integer getPrincipalId() {
             return principalId;
         }
 
-        public void setPrincipalId(String principalId) {
+        public void setPrincipalId(Integer principalId) {
             this.principalId = principalId;
         }
 
