@@ -60,17 +60,11 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
             throw ex;
         }
 
+        EventResponse eventResponse = new EventResponse(eventData, 201);
+
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
         response.setStatusCode(201);
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-        response.setHeaders(headers);
-
-        Map<String, Object> eventWrapper = new HashMap<>();
-        eventWrapper.put("statusCode", 201);
-        eventWrapper.put("event", eventData);
-
-        response.setBody(gson.toJson(eventWrapper));
+        response.setBody(gson.toJson(eventResponse));
         return response;
     }
 
@@ -158,6 +152,32 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 
         public void setSurname(String surname) {
             this.surname = surname;
+        }
+    }
+
+    class EventResponse{
+        private EventData event;
+        private int statusCode;
+
+        public EventResponse(EventData event, int statusCode) {
+            this.event = event;
+            this.statusCode = statusCode;
+        }
+
+        public EventData getEvent() {
+            return event;
+        }
+
+        public void setEvent(EventData event) {
+            this.event = event;
+        }
+
+        public int getStatusCode() {
+            return statusCode;
+        }
+
+        public void setStatusCode(int statusCode) {
+            this.statusCode = statusCode;
         }
     }
 }
