@@ -33,7 +33,7 @@ public class ApiHandler implements RequestHandler<Map<String,String>, Map<String
 
     public Map<String, Object> handleRequest(Map<String,String> request, Context context) {
         LambdaLogger logger = context.getLogger();
-        logger.log("Request body: " + request);
+        logger.log("Request body: " + request.toString());
 
         EventDTO eventDTO = new EventDTO(Integer.valueOf(request.get("principalId")), gson.fromJson(request.get("content"), Content.class));
 
