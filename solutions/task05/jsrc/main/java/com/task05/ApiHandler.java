@@ -27,17 +27,15 @@ import java.util.UUID;
         aliasName = "${lambdas_alias_name}",
         logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
-public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, Map<String, Object>> {
+public class ApiHandler implements RequestHandler<String, Map<String, Object>> {
     private static final Gson gson = new Gson();
     private static final DynamoDbClient dynamoDB = DynamoDbClient.builder().region(Region.EU_CENTRAL_1).build();
 
-    public Map<String, Object> handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+    public Map<String, Object> handleRequest(String request, Context context) {
         LambdaLogger logger = context.getLogger();
+        logger.log("Request body: " + request);
 
-        String requestBody = request.getBody();
-        logger.log("Request body: " + requestBody);
-
-        EventDTO eventDTO = gson.fromJson(requestBody, EventDTO.class);
+        EventDTO eventDTO = gson.fromJson(request, EventDTO.class);
 
         EventData eventData = new EventData();
         eventData.setPrincipalId(eventDTO.getPrincipalId());
