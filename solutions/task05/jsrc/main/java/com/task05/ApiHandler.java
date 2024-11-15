@@ -35,16 +35,13 @@ public class ApiHandler implements RequestHandler<Map<String,Object>, Map<String
         LambdaLogger logger = context.getLogger();
         logger.log("Request body: " + request.toString());
 
-        Map<String, Object> contentMap = (Map<String, Object>) request.get("content");
-        Content content = new Content();
-        content.setName((String) contentMap.get("name"));
-        content.setName((String) contentMap.get("surname"));
+        Map<String, String> contentMap = (Map<String, String>) request.get("content");
 
         EventData eventData = new EventData();
         eventData.setPrincipalId((Integer) request.get("principalId"));
         eventData.setId(UUID.randomUUID().toString());
         eventData.setCreatedAt(ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-        eventData.setBody(content);
+        eventData.setBody(contentMap);
 
         Map<String, AttributeValue> eventItem = new HashMap<>();
         eventItem.put("id", AttributeValue.builder().s(eventData.getId()).build());
@@ -61,18 +58,18 @@ public class ApiHandler implements RequestHandler<Map<String,Object>, Map<String
             throw ex;
         }
 
-        EventResponse eventResponse = new EventResponse(eventData, 201);
-
-
-        String responseBody = gson.toJson(eventResponse);
-        logger.log("Response JSON: " + responseBody);
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-        response.setStatusCode(201);
-        response.setBody(responseBody);
-        response.setHeaders(headers);
+//        EventResponse eventResponse = new EventResponse(eventData, 201);
+//
+//
+//        String responseBody = gson.toJson(eventResponse);
+//        logger.log("Response JSON: " + responseBody);
+//
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("Content-Type", "application/json");
+//        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+//        response.setStatusCode(201);
+//        response.setBody(responseBody);
+//        response.setHeaders(headers);
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("statusCode", 201);
@@ -89,10 +86,13 @@ public class ApiHandler implements RequestHandler<Map<String,Object>, Map<String
         return resultMap;
     }
 
-    private AttributeValue toDynamoDBMap(Content content) {
+    private AttributeValue toDynamoDBMap(Map<String, String> content) {
         Map<String, AttributeValue> contentMap = new HashMap<>();
-        contentMap.put("name", AttributeValue.builder().s(content.getName()).build());
-        contentMap.put("surname", AttributeValue.builder().s(content.getSurname()).build());
+
+        for(Map.Entry<String, String> entry :  content.entrySet()){
+            contentMap.put(entry.getKey(), AttributeValue.builder().s(entry.getValue()).build());
+        }
+
         return AttributeValue.builder().m(contentMap).build();
     }
 
@@ -128,7 +128,7 @@ public class ApiHandler implements RequestHandler<Map<String,Object>, Map<String
     class EventData {
         private String id;
         private Integer principalId;
-        private Content body;
+        private Map<String, String> body;
         private String createdAt;
 
         public EventData() {
@@ -136,7 +136,7 @@ public class ApiHandler implements RequestHandler<Map<String,Object>, Map<String
             this.createdAt = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
 
-        public EventData(String id, Integer principalId, Content content, String createdAt) {
+        public EventData(String id, Integer principalId, Map<String, String> content, String createdAt) {
             this.id = id;
             this.principalId = principalId;
             this.body = content;
@@ -159,11 +159,11 @@ public class ApiHandler implements RequestHandler<Map<String,Object>, Map<String
             this.principalId = principalId;
         }
 
-        public Content getBody() {
+        public Map<String, String> getBody() {
             return body;
         }
 
-        public void setBody(Content content) {
+        public void setBody(Map<String, String> content) {
             this.body = content;
         }
 
@@ -202,6 +202,14 @@ public class ApiHandler implements RequestHandler<Map<String,Object>, Map<String
 
         public void setSurname(String surname) {
             this.surname = surname;
+        }
+
+        @Override
+        public String toString() {
+            return "Content{" +
+                    "name='" + name + '\'' +
+                    ", surname='" + surname + '\'' +
+                    '}';
         }
     }
 
