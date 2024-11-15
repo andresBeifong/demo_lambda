@@ -42,7 +42,7 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 		eventItem.put("content", toDynamoDBMap(eventData.getContent()));
 		eventItem.put("createdAt", AttributeValue.builder().s(eventData.getCreatedAt()).build());
 
-		PutItemRequest eventItemRequest = PutItemRequest.builder().tableName("Events").item(eventItem).build();
+		PutItemRequest eventItemRequest = PutItemRequest.builder().tableName("${target_table}").item(eventItem).build();
 
 		try{
 			dynamoDB.putItem(eventItemRequest);
