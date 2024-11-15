@@ -35,13 +35,16 @@ public class ApiHandler implements RequestHandler<Map<String,Object>, Map<String
         LambdaLogger logger = context.getLogger();
         logger.log("Request body: " + request.toString());
 
-        EventDTO eventDTO = new EventDTO((Integer) request.get("principalId"), gson.fromJson((String) request.get("content"), Content.class));
+        Map<String, Object> contentMap = (Map<String, Object>) request.get("content");
+        Content content = new Content();
+        content.setName((String) contentMap.get("name"));
+        content.setName((String) contentMap.get("surname"));
 
         EventData eventData = new EventData();
-        eventData.setPrincipalId(eventDTO.getPrincipalId());
+        eventData.setPrincipalId((Integer) request.get("principalId"));
         eventData.setId(UUID.randomUUID().toString());
         eventData.setCreatedAt(ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-        eventData.setBody(eventDTO.getContent());
+        eventData.setBody(content);
 
         Map<String, AttributeValue> eventItem = new HashMap<>();
         eventItem.put("id", AttributeValue.builder().s(eventData.getId()).build());
