@@ -27,15 +27,15 @@ import java.util.UUID;
         aliasName = "${lambdas_alias_name}",
         logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
-public class ApiHandler implements RequestHandler<Map<String,String>, Map<String, Object>> {
+public class ApiHandler implements RequestHandler<Map<String,Object>, Map<String, Object>> {
     private static final Gson gson = new Gson();
     private static final DynamoDbClient dynamoDB = DynamoDbClient.builder().region(Region.EU_CENTRAL_1).build();
 
-    public Map<String, Object> handleRequest(Map<String,String> request, Context context) {
+    public Map<String, Object> handleRequest(Map<String,Object> request, Context context) {
         LambdaLogger logger = context.getLogger();
         logger.log("Request body: " + request.toString());
 
-        EventDTO eventDTO = new EventDTO(Integer.valueOf(request.get("principalId")), gson.fromJson(request.get("content"), Content.class));
+        EventDTO eventDTO = new EventDTO((Integer) request.get("principalId"), gson.fromJson((String) request.get("content"), Content.class));
 
         EventData eventData = new EventData();
         eventData.setPrincipalId(eventDTO.getPrincipalId());
