@@ -46,7 +46,7 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
         eventItem.put("content", toDynamoDBMap(eventData.getContent()));
         eventItem.put("createdAt", AttributeValue.builder().s(eventData.getCreatedAt()).build());
 
-        PutItemRequest eventItemRequest = PutItemRequest.builder().tableName(System.getenv("table_name")).item(eventItem).build();
+        PutItemRequest eventItemRequest = PutItemRequest.builder().tableName("cmtr-71b5c20d-Events").item(eventItem).build();
 
         try {
             dynamoDB.putItem(eventItemRequest);
