@@ -25,11 +25,31 @@
     "resource_type": "iam_policy",
     "tags": {}
   },
+  "dynamo-streams-policy": {
+    "policy_content": {
+      "Statement": [
+        {
+          "Action": [
+            "dynamodb:GetRecords",
+            "dynamodb:GetShardIterator",
+            "dynamodb:DescribeStream",
+            "dynamodb:ListStreams"
+          ],
+          "Effect": "Allow",
+          "Resource": "*"
+        }
+      ],
+      "Version": "2012-10-17"
+    },
+    "resource_type": "iam_policy",
+    "tags": {}
+  },
   "audit_producer-role": {
     "predefined_policies": [],
     "principal_service": "lambda",
     "custom_policies": [
-      "lambda-basic-execution"
+      "lambda-basic-execution",
+      "dynamo-streams-policy"
     ],
     "resource_type": "iam_role",
     "tags": {}
