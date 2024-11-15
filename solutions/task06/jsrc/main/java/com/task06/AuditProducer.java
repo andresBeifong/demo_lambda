@@ -47,7 +47,7 @@ public class AuditProducer implements RequestHandler<DynamodbEvent , Void> {
 			Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> valueMap = new HashMap<>();
 			valueMap.put("key", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(String.valueOf(configurationData.get("key"))).build());
 			valueMap.put("value", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().n(String.valueOf(configurationData.get("value"))).build());
-
+			logger.log("Value map: "+ valueMap);
 			auditMap.put("id", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(UUID.randomUUID().toString()).build());
 			auditMap.put("itemKey", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(String.valueOf(configurationData.get("key"))).build());
 			auditMap.put("modificationTime", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)).build());
