@@ -27,11 +27,11 @@ import java.util.UUID;
         aliasName = "${lambdas_alias_name}",
         logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
-public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, Map<String, Object>> {
     private static final Gson gson = new Gson();
     private static final DynamoDbClient dynamoDB = DynamoDbClient.builder().region(Region.EU_CENTRAL_1).build();
 
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+    public Map<String, Object> handleRequest(APIGatewayProxyRequestEvent request, Context context) {
         LambdaLogger logger = context.getLogger();
 
         String requestBody = request.getBody();
@@ -51,7 +51,7 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
         eventItem.put("body", toDynamoDBMap(eventData.getBody()));
         eventItem.put("createdAt", AttributeValue.builder().s(eventData.getCreatedAt()).build());
 
-        PutItemRequest eventItemRequest = PutItemRequest.builder().tableName("cmtr-71b5c20d-Events").item(eventItem).build();
+        PutItemRequest eventItemRequest = PutItemRequest.builder().tableName("cmtr-71b5c20d-Events-test").item(eventItem).build();
 
         try {
             dynamoDB.putItem(eventItemRequest);
@@ -73,7 +73,19 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
         response.setBody(responseBody);
         response.setHeaders(headers);
 
-        return response;
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("statusCode", 201);
+        resultMap.put("body", "{\r\n" + //
+                "    \"statusCode\": 201,\r\n" + //
+                "    \"event\": {\r\n" + //
+                "        \"id\": \"" + eventData.getId() + "\",\r\n" + //
+                "        \"principalId\": " + eventData.getPrincipalId() + ",\r\n" + //
+                "        \"createdAt\": \""  + eventData.createdAt + "\",\r\n" + //
+                "        \"body\": "+ gson.toJson(eventData.getBody()) +" \r\n" + //
+                "    }  \r\n" + //
+                "}");
+
+        return resultMap;
     }
 
     private AttributeValue toDynamoDBMap(Content content) {
