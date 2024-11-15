@@ -6,8 +6,6 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
-import com.syndicate.deployment.annotations.environment.EnvironmentVariable;
-import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.model.RetentionSetting;
 import software.amazon.awssdk.regions.Region;
@@ -29,8 +27,6 @@ import java.util.UUID;
         aliasName = "${lambdas_alias_name}",
         logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
-@EnvironmentVariables(value = @EnvironmentVariable(key = "table_name", value = "${table_name}")
-        )
 public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private static final Gson gson = new Gson();
     private static final DynamoDbClient dynamoDB = DynamoDbClient.builder().region(Region.EU_CENTRAL_1).build();
@@ -41,14 +37,18 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
         String requestBody = request.getBody();
         logger.log("Request body: " + requestBody);
 
-        EventData eventData = gson.fromJson(requestBody, EventData.class);
+        EventDTO eventDTO = gson.fromJson(requestBody, EventDTO.class);
+
+        EventData eventData = new EventData();
+        eventData.setPrincipalId(eventDTO.getPrincipalId());
         eventData.setId(UUID.randomUUID().toString());
         eventData.setCreatedAt(ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        eventData.setBody(eventDTO.getContent());
 
         Map<String, AttributeValue> eventItem = new HashMap<>();
         eventItem.put("id", AttributeValue.builder().s(eventData.getId()).build());
         eventItem.put("principalId", AttributeValue.builder().n(eventData.getPrincipalId().toString()).build());
-        eventItem.put("content", toDynamoDBMap(eventData.getContent()));
+        eventItem.put("body", toDynamoDBMap(eventData.getBody()));
         eventItem.put("createdAt", AttributeValue.builder().s(eventData.getCreatedAt()).build());
 
         PutItemRequest eventItemRequest = PutItemRequest.builder().tableName("cmtr-71b5c20d-Events").item(eventItem).build();
@@ -62,9 +62,17 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 
         EventResponse eventResponse = new EventResponse(eventData, 201);
 
+
+        String responseBody = gson.toJson(eventResponse);
+        logger.log("Response JSON: " + responseBody);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
         response.setStatusCode(201);
-        response.setBody(gson.toJson(eventResponse));
+        response.setBody(responseBody);
+        response.setHeaders(headers);
+
         return response;
     }
 
@@ -75,10 +83,39 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
         return AttributeValue.builder().m(contentMap).build();
     }
 
+    class EventDTO{
+        private int principalId;
+        private Content content;
+
+        public EventDTO() {
+        }
+
+        public EventDTO(int principalId, Content content) {
+            this.principalId = principalId;
+            this.content = content;
+        }
+
+        public int getPrincipalId() {
+            return principalId;
+        }
+
+        public void setPrincipalId(int principalId) {
+            this.principalId = principalId;
+        }
+
+        public Content getContent() {
+            return content;
+        }
+
+        public void setContent(Content content) {
+            this.content = content;
+        }
+    }
+
     class EventData {
         private String id;
         private Integer principalId;
-        private Content content;
+        private Content body;
         private String createdAt;
 
         public EventData() {
@@ -89,7 +126,7 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
         public EventData(String id, Integer principalId, Content content, String createdAt) {
             this.id = id;
             this.principalId = principalId;
-            this.content = content;
+            this.body = content;
             this.createdAt = createdAt;
         }
 
@@ -109,12 +146,12 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
             this.principalId = principalId;
         }
 
-        public Content getContent() {
-            return content;
+        public Content getBody() {
+            return body;
         }
 
-        public void setContent(Content content) {
-            this.content = content;
+        public void setBody(Content content) {
+            this.body = content;
         }
 
         public String getCreatedAt() {
