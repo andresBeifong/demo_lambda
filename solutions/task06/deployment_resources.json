@@ -33,7 +33,8 @@
             "dynamodb:GetRecords",
             "dynamodb:GetShardIterator",
             "dynamodb:DescribeStream",
-            "dynamodb:ListStreams"
+            "dynamodb:ListStreams",
+            "dynamodb:UpdateItem"
           ],
           "Effect": "Allow",
           "Resource": "*"
@@ -70,7 +71,11 @@
     "hash_key_type": "S",
     "read_capacity": 1,
     "write_capacity": 1,
-    "global_indexes": [],
+    "global_indexes": [{
+      "name": "item_key_index",
+      "index_key_name": "item_key",
+      "index_key_type": "S"
+    }],
     "autoscaling": [],
     "tags": {}
   }

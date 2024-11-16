@@ -40,30 +40,56 @@ public class AuditProducer implements RequestHandler<DynamodbEvent , Void> {
 	}
 
 	private void handleRecordEvent(DynamodbEvent.DynamodbStreamRecord record, LambdaLogger logger){
-		Map<String, AttributeValue> configurationData = record.getDynamodb().getNewImage();
 		String targetTable = System.getenv("target_table");
 		if("INSERT".equals(record.getEventName())){
-			Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> auditMap = new HashMap<>();
-			Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> valueMap = new HashMap<>();
-			valueMap.put("key", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(String.valueOf(configurationData.get("key"))).build());
-			valueMap.put("value", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().n(String.valueOf(configurationData.get("value"))).build());
-			logger.log("Value map: "+ valueMap);
-			auditMap.put("id", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(UUID.randomUUID().toString()).build());
-			auditMap.put("itemKey", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(String.valueOf(configurationData.get("key"))).build());
-			auditMap.put("modificationTime", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)).build());
-			auditMap.put("newValue", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().m(valueMap).build());
-
-			PutItemRequest auditItemRequest = PutItemRequest.builder().tableName(targetTable).item(auditMap).build();
-            try {
-                dynamoDB.putItem(auditItemRequest);
-            } catch (DynamoDbException ex) {
-				logger.log("An error occurred when saving Audit to DynamoDB: " + ex.getMessage());
-				throw ex;
-			}
+			logger.log("Inserting new item: " + record.getDynamodb().getNewImage());
+			insertItem(record, targetTable, logger);
         }else if("MODIFY".equals(record.getEventName())){
+			logger.log("Updating item: " + record.getDynamodb().getNewImage());
+			updateItem(record, targetTable, logger);
+		}
+	}
+
+	private void insertItem(DynamodbEvent.DynamodbStreamRecord record, String tableName, LambdaLogger logger){
+		Map<String, AttributeValue> configurationMap = record.getDynamodb().getNewImage();
+		Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> newAuditMap = new HashMap<>();
+		Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> newValueMap = new HashMap<>();
+
+		newValueMap.put("key",
+				software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder()
+						.s(configurationMap.get("key").getS())
+						.build()
+		);
+		newValueMap.put("value",
+				software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder()
+						.n(configurationMap.get("value").getN())
+						.build()
+		);
+
+		newAuditMap.put("id", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(UUID.randomUUID().toString()).build());
+		newAuditMap.put("itemKey", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(configurationMap.get("key").getS()).build());
+		newAuditMap.put("modificationTime", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)).build());
+		newAuditMap.put("newValue", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().m(newValueMap).build());
+
+		PutItemRequest auditItemRequest = PutItemRequest.builder().tableName(tableName).item(newAuditMap).build();
+		try {
+			dynamoDB.putItem(auditItemRequest);
+		} catch (DynamoDbException ex) {
+			logger.log("An error occurred when saving Audit to DynamoDB: " + ex.getMessage());
+			throw ex;
+		}
+	}
+
+	private void updateItem(DynamodbEvent.DynamodbStreamRecord record, String tableName, LambdaLogger logger){
+		Map<String, AttributeValue> configurationData = record.getDynamodb().getNewImage();
+		Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> currentAudit =
+				getItem(tableName, "item_key_index", "itemKey", configurationData.get("key").getS(), logger);
+
+		if(currentAudit != null) {
 			Map<String, AttributeValue> oldConfigurationData = record.getDynamodb().getOldImage();
 			HashMap<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> itemKey = new HashMap<>();
-			itemKey.put("id", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(String.valueOf(configurationData.get("id"))).build());
+
+			itemKey.put("id", currentAudit.get("id"));
 
 			HashMap<String, AttributeValueUpdate> updatedValues = new HashMap<>();
 
@@ -72,11 +98,11 @@ public class AuditProducer implements RequestHandler<DynamodbEvent , Void> {
 					.action(AttributeAction.PUT)
 					.build());
 			updatedValues.put("oldValue", AttributeValueUpdate.builder()
-					.value(software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(String.valueOf(oldConfigurationData.get("value"))).build())
+					.value(software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(oldConfigurationData.get("value").getN()).build())
 					.action(AttributeAction.PUT)
 					.build());
 			updatedValues.put("newValue", AttributeValueUpdate.builder()
-					.value(software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(String.valueOf(configurationData.get("value"))).build())
+					.value(software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(configurationData.get("value").getN()).build())
 					.action(AttributeAction.PUT)
 					.build());
 			updatedValues.put("updatedAttribute", AttributeValueUpdate.builder()
@@ -84,7 +110,11 @@ public class AuditProducer implements RequestHandler<DynamodbEvent , Void> {
 					.action(AttributeAction.PUT)
 					.build());
 
-			UpdateItemRequest updateItemRequest = UpdateItemRequest.builder().tableName(targetTable).key(itemKey).attributeUpdates(updatedValues).build();
+			UpdateItemRequest updateItemRequest = UpdateItemRequest.builder()
+					.tableName(tableName)
+					.key(itemKey)
+					.attributeUpdates(updatedValues)
+					.build();
 			try {
 				dynamoDB.updateItem(updateItemRequest);
 			} catch (DynamoDbException ex) {
@@ -92,5 +122,29 @@ public class AuditProducer implements RequestHandler<DynamodbEvent , Void> {
 				throw ex;
 			}
 		}
+	}
+
+	private Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> getItem(String tableName, String indexName, String key, String keyVal, LambdaLogger logger) {
+		logger.log("Getting item by key: " + key + " value: " + keyVal);
+
+		Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> values = new HashMap<>();
+		values.put(":itemKey", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(keyVal).build());
+
+		QueryRequest queryRequest = QueryRequest.builder()
+				.tableName(tableName)
+				.indexName(indexName)
+				.keyConditionExpression("itemKey = :itemKey")
+				.expressionAttributeValues(values)
+				.build();
+
+		try {
+			QueryResponse response = dynamoDB.query(queryRequest);
+			if(!response.items().isEmpty()){
+				return response.items().get(0);
+			}
+		} catch (DynamoDbException e) {
+			logger.log("An error occurred while getting item: " + e.getMessage());
+		}
+		return null;
 	}
 }
