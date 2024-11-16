@@ -98,11 +98,11 @@ public class AuditProducer implements RequestHandler<DynamodbEvent , Void> {
 					.action(AttributeAction.PUT)
 					.build());
 			updatedValues.put("oldValue", AttributeValueUpdate.builder()
-					.value(software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(oldConfigurationData.get("value").getN()).build())
+					.value(software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().n(oldConfigurationData.get("value").getN()).build())
 					.action(AttributeAction.PUT)
 					.build());
 			updatedValues.put("newValue", AttributeValueUpdate.builder()
-					.value(software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(configurationData.get("value").getN()).build())
+					.value(software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().n(configurationData.get("value").getN()).build())
 					.action(AttributeAction.PUT)
 					.build());
 			updatedValues.put("updatedAttribute", AttributeValueUpdate.builder()
