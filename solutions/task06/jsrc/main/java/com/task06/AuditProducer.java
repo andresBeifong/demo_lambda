@@ -128,7 +128,11 @@ public class AuditProducer implements RequestHandler<DynamodbEvent , Void> {
 		logger.log("Getting item by key: " + key + " value: " + keyVal);
 
 		Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> values = new HashMap<>();
-		values.put(":itemKey", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(keyVal).build());
+		values.put(":itemKey",
+				software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder()
+						.s(keyVal)
+						.build()
+		);
 
 		QueryRequest queryRequest = QueryRequest.builder()
 				.tableName(tableName)

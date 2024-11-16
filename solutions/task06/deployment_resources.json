@@ -73,7 +73,7 @@
     "write_capacity": 1,
     "global_indexes": [{
       "name": "item_key_index",
-      "index_key_name": "item_key",
+      "index_key_name": "itemKey",
       "index_key_type": "S"
     }],
     "autoscaling": [],
