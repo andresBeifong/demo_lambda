@@ -29,11 +29,11 @@ import java.util.UUID;
 )
 @RuleEventSource(targetRule = "uuid_trigger")
 @EnvironmentVariable(key = "target_bucket", value = "${target_bucket}")
-public class UuidGenerator {
+public class UuidGenerator implements RequestHandler<Void, Void>{
 	private final String targetBucket = System.getenv("target_bucket");
 	private final S3Client s3Client = S3Client.builder().region(Region.EU_CENTRAL_1).build();
 
-	public void handleRequest(Context context) {
+	public Void handleRequest(Void object, Context context) {
 		String filename = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 		try{
 			File file = File.createTempFile(filename, "txt");
@@ -55,5 +55,6 @@ public class UuidGenerator {
 		}finally {
 			s3Client.close();
 		}
+		return null;
 	}
 }
