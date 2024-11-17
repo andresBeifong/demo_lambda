@@ -18,7 +18,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @LambdaHandler(
@@ -33,16 +32,17 @@ import java.util.UUID;
 public class UuidGenerator implements RequestHandler<Void, Void>{
 	private final String targetBucket = System.getenv("target_bucket");
 	private final S3Client s3Client = S3Client.builder().region(Region.EU_CENTRAL_1).build();
+	private ZonedDateTime lambdaDateTime = null;
 
-	public Void handleRequest(Void object, Context context) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-		ZonedDateTime startTime = ZonedDateTime.parse("2024-01-01T00:00:00.000000Z", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-		ZonedDateTime now = ZonedDateTime.now();
-		long minutesBetween = ChronoUnit.MINUTES.between(startTime, now);
-		ZonedDateTime adjustedStartTime = startTime.plusMinutes(minutesBetween);
-		String filename = adjustedStartTime.format(formatter);
-
+    public Void handleRequest(Void object, Context context) {
 		try{
+            String startingTime = "2024-01-01T00:00:00.000Z";
+            String filename = startingTime;
+			if(lambdaDateTime == null){
+				lambdaDateTime = ZonedDateTime.parse(startingTime);
+			}else{
+				filename = lambdaDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+			}
 			context.getLogger().log("Creating file with name: " + filename + ".txt");
 			File file = File.createTempFile(filename, "txt");
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
