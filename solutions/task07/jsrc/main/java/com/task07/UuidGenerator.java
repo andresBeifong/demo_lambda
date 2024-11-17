@@ -36,6 +36,7 @@ public class UuidGenerator implements RequestHandler<Void, Void>{
 	private final String targetBucket = System.getenv("target_bucket");
 	private final S3Client s3Client = S3Client.builder().region(Region.EU_CENTRAL_1).build();
 	private ZonedDateTime startTime = null;
+	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
     public Void handleRequest(Void object, Context context) {
 		try{
@@ -43,12 +44,12 @@ public class UuidGenerator implements RequestHandler<Void, Void>{
 			String filename;
 			if(startTime == null){
 				startTime = ZonedDateTime.now(ZoneOffset.UTC);
-				filename = "2024-01-01T00:00:00.000000Z";
+				filename = "2024-01-01T00:00:00.000000";
 			}else {
 				ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
 				long minutesSinceStart = ChronoUnit.MINUTES.between(startTime, now);
 				ZonedDateTime adjustedTime = baseTime.plusMinutes(minutesSinceStart);
-				filename = adjustedTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+				filename = adjustedTime.format(formatter);
 			}
 			context.getLogger().log("Creating file with name: " + filename + ".txt");
 			File file = File.createTempFile(filename, "txt");
