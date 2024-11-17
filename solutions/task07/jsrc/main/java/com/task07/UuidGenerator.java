@@ -2,6 +2,7 @@ package com.task07;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.google.gson.Gson;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariable;
 import com.syndicate.deployment.annotations.events.RuleEventSource;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
@@ -21,7 +22,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.UUID;
+import java.util.*;
 
 @LambdaHandler(
     lambdaName = "uuid_generator",
@@ -35,6 +36,7 @@ import java.util.UUID;
 public class UuidGenerator implements RequestHandler<Void, Void>{
 	private final String targetBucket = System.getenv("target_bucket");
 	private final S3Client s3Client = S3Client.builder().region(Region.EU_CENTRAL_1).build();
+	private static final Gson gson = new Gson();
 	private ZonedDateTime startTime = null;
 	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
@@ -54,9 +56,13 @@ public class UuidGenerator implements RequestHandler<Void, Void>{
 			context.getLogger().log("Creating file with name: " + filename + ".txt");
 			File file = File.createTempFile(filename, "txt");
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+			List<String> ids = new ArrayList<>();
 			for(int index = 0; index < 10; index ++){
-				writer.write(UUID.randomUUID().toString());
+				ids.add(UUID.randomUUID().toString());
 			}
+			Map<String, Object> wrapper = new HashMap<>();
+			wrapper.put("ids", ids);
+			writer.write(gson.toJson(wrapper));
 			writer.close();
 
 			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
