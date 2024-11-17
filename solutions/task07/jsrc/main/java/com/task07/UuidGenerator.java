@@ -54,8 +54,6 @@ public class UuidGenerator implements RequestHandler<Void, Void>{
 			context.getLogger().log("File uploaded");
 		}catch (IOException | S3Exception ex){
 			context.getLogger().log("An error occurred while trying to upload file to S3: " + ex.getMessage());
-		}finally {
-			s3Client.close();
 		}
 		return null;
 	}
