@@ -36,6 +36,7 @@ public class UuidGenerator implements RequestHandler<Void, Void>{
 	public Void handleRequest(Void object, Context context) {
 		String filename = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 		try{
+			context.getLogger().log("Creating file with name: " + filename + ".txt");
 			File file = File.createTempFile(filename, "txt");
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 			for(int index = 0; index < 10; index ++){
@@ -50,6 +51,7 @@ public class UuidGenerator implements RequestHandler<Void, Void>{
 
 			s3Client.putObject(putObjectRequest, RequestBody.fromFile(file));
 			file.delete();
+			context.getLogger().log("File uploaded");
 		}catch (IOException | S3Exception ex){
 			context.getLogger().log("An error occurred while trying to upload file to S3: " + ex.getMessage());
 		}finally {
