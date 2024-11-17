@@ -60,7 +60,7 @@ public class UuidGenerator implements RequestHandler<Void, Void>{
 
 			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
 					.bucket(targetBucket)
-					.key(filename + ".txt")
+					.key(filename)
 					.build();
 
 			s3Client.putObject(putObjectRequest, RequestBody.fromFile(file));
