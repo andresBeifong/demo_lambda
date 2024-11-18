@@ -14,6 +14,7 @@ import com.syndicate.deployment.model.lambda.url.AuthType;
 import com.syndicate.deployment.model.lambda.url.InvokeMode;
 import com.task08.lambdalayer.OpenMeteoAPI;
 
+import java.io.IOException;
 import java.util.Map;
 
 @LambdaHandler(
@@ -41,12 +42,16 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context context) {
         APIGatewayV2HTTPEvent.RequestContext.Http http = event.getRequestContext().getHttp();
         if("GET".equals(http.getMethod()) && http.getPath().contains("/weather")){
-            String weatherData = weatherAPI.getData();
-            return APIGatewayV2HTTPResponse.builder()
-                    .withBody(weatherData)
-                    .withStatusCode(200)
-                    .withHeaders(responseHeaders)
-                    .build();
+            try {
+                String weatherData = weatherAPI.getData();
+                return APIGatewayV2HTTPResponse.builder()
+                        .withBody(weatherData)
+                        .withStatusCode(200)
+                        .withHeaders(responseHeaders)
+                        .build();
+            } catch (Exception e) {
+                context.getLogger().log("An error occurred while getting weather data: " + e.getMessage());
+            }
         }
         return APIGatewayV2HTTPResponse.builder()
                 .withBody("Path not found")
