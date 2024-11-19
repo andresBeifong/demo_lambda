@@ -15,6 +15,7 @@ import com.task10.handler.*;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import java.util.Map;
 
@@ -32,7 +33,9 @@ import static com.syndicate.deployment.model.environment.ValueTransformer.USER_P
 @EnvironmentVariables(value = {
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
 		@EnvironmentVariable(key = "COGNITO_ID", value = "${pool_name}", valueTransformer = USER_POOL_NAME_TO_USER_POOL_ID),
-		@EnvironmentVariable(key = "CLIENT_ID", value = "${pool_name}", valueTransformer = USER_POOL_NAME_TO_CLIENT_ID)
+		@EnvironmentVariable(key = "CLIENT_ID", value = "${pool_name}", valueTransformer = USER_POOL_NAME_TO_CLIENT_ID),
+		@EnvironmentVariable(key = "tables_table", value = "${tables_table}"),
+		@EnvironmentVariable(key = "reservations_table", value = "${reservations_table}")
 })
 public class ApiHandler implements  RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -40,6 +43,9 @@ public class ApiHandler implements  RequestHandler<APIGatewayProxyRequestEvent, 
 	private final Map<RouteKey, RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent>> handlersByRouteKey;
 	private final Map<String, String> headersForCORS;
 	private final RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> routeNotImplementedHandler;
+	public static final DynamoDbClient dynamoDB = DynamoDbClient.builder().region(Region.EU_CENTRAL_1).build();
+	public static final String TABLES_TABLE_NAME = System.getenv("tables_table");
+	public static final String RESERVATIONS_TABLE_NAME = System.getenv("reservations_table");
 
 	public ApiHandler() {
 		this.cognitoClient = initCognitoClient();
@@ -75,7 +81,11 @@ public class ApiHandler implements  RequestHandler<APIGatewayProxyRequestEvent, 
 				new RouteKey("GET", "/"), new GetRootHandler(),
 				new RouteKey("POST", "/signup"), new PostSignUpHandler(cognitoClient),
 				new RouteKey("POST", "/signin"), new PostSignInHandler(cognitoClient),
-				new RouteKey("GET", "/tables"), new GetTablesHandler()
+				new RouteKey("GET", "/tables"), new GetTablesHandler(),
+				new RouteKey("GET", "/tables/{tableId}"), new GetTableByIdHandler(),
+				new RouteKey("POST", "/tables"), new PostTablesHandler(),
+				new RouteKey("GET", "/reservations"), new GetReservationsHandler(),
+				new RouteKey("POST", "/reservations"), new PostReservationsHandler()
 		);
 	}
 
