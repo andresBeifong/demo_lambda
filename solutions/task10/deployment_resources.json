@@ -33,6 +33,27 @@
     "resource_type": "iam_policy",
     "tags": {}
   },
+  "dynamo_custom_policy": {
+    "policy_content": {
+      "Statement": [
+        {
+          "Action": [
+            "dynamodb:GetItem",
+            "dynamodb:Query",
+            "dynamodb:PutItem",
+            "dynamodb:Batch*",
+            "dynamodb:DeleteItem",
+            "dynamodb:Scan"
+          ],
+          "Effect": "Allow",
+          "Resource": "*"
+        }
+      ],
+      "Version": "2012-10-17"
+    },
+    "resource_type": "iam_policy",
+    "tags": {}
+  },
   "cognito_custom_policy": {
     "policy_content": {
       "Statement": [
@@ -68,7 +89,8 @@
     "principal_service": "lambda",
     "custom_policies": [
       "lambda-basic-execution",
-      "cognito_custom_policy"
+      "cognito_custom_policy",
+      "dynamo_custom_policy"
     ],
     "resource_type": "iam_role",
     "tags": {}
@@ -226,7 +248,7 @@
   "Tables": {
     "resource_type": "dynamodb_table",
     "hash_key_name": "id",
-    "hash_key_type": "S",
+    "hash_key_type": "N",
     "read_capacity": 1,
     "write_capacity": 1,
     "global_indexes": [],

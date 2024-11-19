@@ -19,9 +19,8 @@ public class GetTableByIdHandler implements RequestHandler<APIGatewayProxyReques
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
         try {
             Map<String, AttributeValue> keyToGet = new HashMap<>();
-
-            Map<String, String> queryStringParameters = requestEvent.getQueryStringParameters();
-            String tableId = queryStringParameters.get("id");
+            Map<String, String> pathParameters = requestEvent.getPathParameters();
+            String tableId = pathParameters.get("tableId");
             if(tableId == null){
                 return new APIGatewayProxyResponseEvent()
                         .withStatusCode(400)
@@ -38,14 +37,14 @@ public class GetTableByIdHandler implements RequestHandler<APIGatewayProxyReques
                     .build();
 
             Map<String, AttributeValue> found = ApiHandler.dynamoDB.getItem(request).item();
-            if(found != null) {
+            if(found != null && !found.isEmpty()) {
                 JSONObject tableJson = new JSONObject();
-                tableJson.put("id", found.get("id").getValueForField("N", Integer.class));
-                tableJson.put("number", found.get("number").getValueForField("N", Integer.class));
-                tableJson.put("places", found.get("places").getValueForField("N", Integer.class));
-                tableJson.put("isVip", found.get("isVip").getValueForField("B", Boolean.class));
+                tableJson.put("id", Integer.parseInt(found.get("id").n()));
+                tableJson.put("number", Integer.parseInt(found.get("number").n()));
+                tableJson.put("places", Integer.parseInt(found.get("places").n()));
+                tableJson.put("isVip", found.get("isVip").bool());
                 if(found.containsKey("minOrder"))
-                    tableJson.put("minOrder", found.get("minOrder").getValueForField("N", Integer.class));
+                    tableJson.put("minOrder", Integer.parseInt(found.get("minOrder").n()));
                 return new APIGatewayProxyResponseEvent()
                         .withStatusCode(200)
                         .withBody(tableJson.toString());

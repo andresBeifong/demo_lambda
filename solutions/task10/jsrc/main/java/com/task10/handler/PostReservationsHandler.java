@@ -23,7 +23,7 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
             Map<String, AttributeValue> tableDataMap = new HashMap<>();
             String reservationId = UUID.randomUUID().toString();
 
-            tableDataMap.put("reservationId", AttributeValue.builder().s(reservationId).build());
+            tableDataMap.put("id", AttributeValue.builder().s(reservationId).build());
             tableDataMap.put("tableNumber", AttributeValue.builder().s(String.valueOf(tableRequest.get("tableNumber"))).build());
             tableDataMap.put("clientName", AttributeValue.builder().s(String.valueOf(tableRequest.get("clientName"))).build());
             tableDataMap.put("phoneNumber", AttributeValue.builder().s(String.valueOf(tableRequest.get("phoneNumber"))).build());

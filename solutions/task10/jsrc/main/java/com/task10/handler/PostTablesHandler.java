@@ -6,7 +6,6 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.task10.ApiHandler;
 import org.json.JSONObject;
-import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
@@ -25,7 +24,7 @@ public class PostTablesHandler implements RequestHandler<APIGatewayProxyRequestE
             tableDataMap.put("id", AttributeValue.builder().n(String.valueOf(tableId)).build());
             tableDataMap.put("number", AttributeValue.builder().n(String.valueOf(tableRequest.get("number"))).build());
             tableDataMap.put("places", AttributeValue.builder().n(String.valueOf(tableRequest.get("places"))).build());
-            tableDataMap.put("isVip", AttributeValue.builder().b((SdkBytes) tableRequest.get("number")).build());
+            tableDataMap.put("isVip", AttributeValue.builder().bool((Boolean) tableRequest.get("isVip")).build());
             if(tableRequest.has("minOrder"))
                 tableDataMap.put("minOrder", AttributeValue.builder().n(String.valueOf(tableRequest.get("number"))).build());
 

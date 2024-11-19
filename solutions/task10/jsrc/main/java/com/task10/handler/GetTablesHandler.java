@@ -27,12 +27,12 @@ public class GetTablesHandler  implements RequestHandler<APIGatewayProxyRequestE
 
             for(Map<String, AttributeValue> item : items){
                 JSONObject tableJson = new JSONObject();
-                tableJson.put("id", item.get("id").getValueForField("N", Integer.class));
-                tableJson.put("number", item.get("number").getValueForField("N", Integer.class));
-                tableJson.put("places", item.get("places").getValueForField("N", Integer.class));
-                tableJson.put("isVip", item.get("isVip").getValueForField("B", Boolean.class));
+                tableJson.put("id", Integer.parseInt(item.get("id").n()));
+                tableJson.put("number", Integer.parseInt(item.get("number").n()));
+                tableJson.put("places", Integer.parseInt(item.get("places").n()));
+                tableJson.put("isVip", item.get("isVip").bool());
                 if(item.containsKey("minOrder"))
-                    tableJson.put("minOrder", item.get("minOrder").getValueForField("N", Integer.class));
+                    tableJson.put("minOrder", Integer.parseInt(item.get("minOrder").n()));
                 tables.put(tableJson);
             }
             return new APIGatewayProxyResponseEvent()
