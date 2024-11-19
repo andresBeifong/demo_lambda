@@ -9,6 +9,8 @@ import org.json.JSONObject;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 
+import java.util.Arrays;
+
 public class PostSignUpHandler extends CognitoSupport implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     public PostSignUpHandler(CognitoIdentityProviderClient cognitoClient) {
         super(cognitoClient);
@@ -18,7 +20,7 @@ public class PostSignUpHandler extends CognitoSupport implements RequestHandler<
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
         try {
             SignUp signUp = SignUp.fromJson(requestEvent.getBody());
-
+            context.getLogger().log("User data: " + signUp);
             // sign up
             String userId = cognitoSignUp(signUp)
                     .user().attributes().stream()
@@ -39,6 +41,8 @@ public class PostSignUpHandler extends CognitoSupport implements RequestHandler<
                             .put("accessToken", idToken)
                             .toString());
         } catch (Exception e) {
+            context.getLogger().log( "Error while signup: " + e.getMessage());
+            context.getLogger().log( Arrays.toString(e.getStackTrace()));
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(400)
                     .withBody(new JSONObject().put("error", e.getMessage()).toString());
