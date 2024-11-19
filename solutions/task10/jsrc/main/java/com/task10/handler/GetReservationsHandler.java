@@ -30,7 +30,7 @@ public class GetReservationsHandler implements RequestHandler<APIGatewayProxyReq
                 tableJson.put("tableNumber", Integer.parseInt(item.get("tableNumber").n()));
                 tableJson.put("clientName", item.get("clientName").s());
                 tableJson.put("phoneNumber", item.get("phoneNumber").s());
-                tableJson.put("date", item.get("date").s());
+                tableJson.put("date", item.get("reservationDate").s());
                 tableJson.put("slotTimeStart", item.get("slotTimeStart").s());
                 tableJson.put("slotTimeEnd", item.get("slotTimeEnd").s());
                 reservations.put(tableJson);

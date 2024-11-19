@@ -261,7 +261,13 @@
     "hash_key_type": "S",
     "read_capacity": 1,
     "write_capacity": 1,
-    "global_indexes": [],
+    "global_indexes": [
+      {
+        "name": "table_key_index",
+        "index_key_name": "tableNumber",
+        "index_key_type": "N"
+      }
+    ],
     "autoscaling": [],
     "tags": {}
   }

@@ -9,11 +9,9 @@ import org.json.JSONObject;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -44,7 +42,7 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
             tableDataMap.put("tableNumber", AttributeValue.builder().n(String.valueOf(tableRequest.get("tableNumber"))).build());
             tableDataMap.put("clientName", AttributeValue.builder().s(String.valueOf(tableRequest.get("clientName"))).build());
             tableDataMap.put("phoneNumber", AttributeValue.builder().s(String.valueOf(tableRequest.get("phoneNumber"))).build());
-            tableDataMap.put("date", AttributeValue.builder().s(String.valueOf(tableRequest.get("date"))).build());
+            tableDataMap.put("reservationDate", AttributeValue.builder().s(String.valueOf(tableRequest.get("date"))).build());
             tableDataMap.put("slotTimeStart", AttributeValue.builder().s(String.valueOf(tableRequest.get("slotTimeStart"))).build());
             tableDataMap.put("slotTimeEnd", AttributeValue.builder().s(String.valueOf(tableRequest.get("slotTimeEnd"))).build());
 
@@ -56,6 +54,8 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
                     .withStatusCode(200)
                     .withBody(new JSONObject().put("reservationId", reservationId).toString());
         } catch (DynamoDbException e) {
+            context.getLogger().log("Error occurred: " + e.getMessage());
+            context.getLogger().log(Arrays.toString(e.getStackTrace()));
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(400)
                     .withBody(new JSONObject().put("error", e.getMessage()).toString());
@@ -69,7 +69,9 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
 
         QueryRequest queryRequest = QueryRequest.builder()
                 .tableName(ApiHandler.RESERVATIONS_TABLE_NAME)
-                .filterExpression("tableNumber = :num AND date = :d")
+                .indexName("table_key_index")
+                .keyConditionExpression("tableNumber =:num")
+                .filterExpression("reservationDate = :d")
                 .expressionAttributeValues(expressionAttributeValues)
                 .build();
 
@@ -79,7 +81,7 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
 
     private boolean tableExists(String tableNumber) {
         Map<String, AttributeValue> key = new HashMap<>();
-        key.put("id", AttributeValue.builder().s(tableNumber).build());
+        key.put("id", AttributeValue.builder().n(tableNumber).build());
 
         GetItemRequest request = GetItemRequest.builder()
                 .tableName(ApiHandler.TABLES_TABLE_NAME)
@@ -91,13 +93,15 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
     }
 
     private boolean checkForOverlap(List<Map<String, AttributeValue>> existingReservations, String startTime, String endTime) {
+
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        LocalDateTime start = LocalDateTime.parse(startTime, formatter);
-        LocalDateTime end = LocalDateTime.parse(endTime, formatter);
+        LocalTime start = LocalTime.parse(startTime, formatter);
+        LocalTime end = LocalTime.parse(endTime, formatter);
 
         for (Map<String, AttributeValue> reservation : existingReservations) {
-            LocalDateTime existingStart = LocalDateTime.parse(reservation.get("slotTimeStart").s(), formatter);
-            LocalDateTime existingEnd = LocalDateTime.parse(reservation.get("slotTimeEnd").s(), formatter);
+            LocalTime existingStart = LocalTime.parse(reservation.get("slotTimeStart").s(), formatter);
+            LocalTime existingEnd = LocalTime.parse(reservation.get("slotTimeEnd").s(), formatter);
 
             if (start.isBefore(existingEnd) && end.isAfter(existingStart)) {
                 return true;
