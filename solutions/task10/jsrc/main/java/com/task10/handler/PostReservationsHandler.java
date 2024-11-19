@@ -6,11 +6,12 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.task10.ApiHandler;
 import org.json.JSONObject;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
-import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,6 +21,14 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
         try {
             JSONObject tableRequest = new JSONObject(requestEvent.getBody());
+
+            List<Map<String, AttributeValue>> existingReservations = existingReservations(tableRequest);
+            if(checkForOverlap(existingReservations, tableRequest.getString("slotTimeStart"), tableRequest.getString("slotTimeEnd"))){
+                return new APIGatewayProxyResponseEvent()
+                        .withStatusCode(400)
+                        .withBody(new JSONObject().put("error", "Reservation time slot overlaps with an existing reservation.").toString());
+            }
+
             Map<String, AttributeValue> tableDataMap = new HashMap<>();
             String reservationId = UUID.randomUUID().toString();
 
@@ -43,5 +52,36 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
                     .withStatusCode(400)
                     .withBody(new JSONObject().put("error", e.getMessage()).toString());
         }
+    }
+
+    private List<Map<String, AttributeValue>> existingReservations(JSONObject tableJSON) {
+        Map<String, AttributeValue> expressionAttributeValues = new HashMap<>();
+        expressionAttributeValues.put(":num", AttributeValue.builder().n(String.valueOf(tableJSON.get("tableNumber"))).build());
+        expressionAttributeValues.put(":d", AttributeValue.builder().s(String.valueOf(tableJSON.get("date"))).build());
+
+        QueryRequest queryRequest = QueryRequest.builder()
+                .tableName(ApiHandler.RESERVATIONS_TABLE_NAME)
+                .filterExpression("tableNumber = :num AND date = :d")
+                .expressionAttributeValues(expressionAttributeValues)
+                .build();
+
+        QueryResponse result = ApiHandler.dynamoDB.query(queryRequest);
+        return result.items();
+    }
+
+    private boolean checkForOverlap(List<Map<String, AttributeValue>> existingReservations, String startTime, String endTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        LocalDateTime start = LocalDateTime.parse(startTime, formatter);
+        LocalDateTime end = LocalDateTime.parse(endTime, formatter);
+
+        for (Map<String, AttributeValue> reservation : existingReservations) {
+            LocalDateTime existingStart = LocalDateTime.parse(reservation.get("slotTimeStart").s(), formatter);
+            LocalDateTime existingEnd = LocalDateTime.parse(reservation.get("slotTimeEnd").s(), formatter);
+
+            if (start.isBefore(existingEnd) && end.isAfter(existingStart)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
