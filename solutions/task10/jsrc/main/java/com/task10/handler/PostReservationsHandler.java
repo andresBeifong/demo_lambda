@@ -22,6 +22,12 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
         try {
             JSONObject tableRequest = new JSONObject(requestEvent.getBody());
 
+            if(!tableExists(String.valueOf(tableRequest.get("tableNumber")))){
+                return new APIGatewayProxyResponseEvent()
+                        .withStatusCode(400)
+                        .withBody(new JSONObject().put("error", "Table does not exist.").toString());
+            }
+
             List<Map<String, AttributeValue>> existingReservations = existingReservations(tableRequest);
             if(checkForOverlap(existingReservations, tableRequest.getString("slotTimeStart"), tableRequest.getString("slotTimeEnd"))){
                 return new APIGatewayProxyResponseEvent()
@@ -67,6 +73,19 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
 
         QueryResponse result = ApiHandler.dynamoDB.query(queryRequest);
         return result.items();
+    }
+
+    private boolean tableExists(String tableNumber) {
+        Map<String, AttributeValue> key = new HashMap<>();
+        key.put("id", AttributeValue.builder().s(tableNumber).build());
+
+        GetItemRequest request = GetItemRequest.builder()
+                .tableName(ApiHandler.TABLES_TABLE_NAME)
+                .key(key)
+                .build();
+
+        GetItemResponse result = ApiHandler.dynamoDB.getItem(request);
+        return result.item() != null && !result.item().isEmpty();
     }
 
     private boolean checkForOverlap(List<Map<String, AttributeValue>> existingReservations, String startTime, String endTime) {
