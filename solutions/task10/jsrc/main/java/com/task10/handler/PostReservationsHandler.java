@@ -22,6 +22,8 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
         try {
             JSONObject tableRequest = new JSONObject(requestEvent.getBody());
 
+            context.getLogger().log("Data input: " + tableRequest);
+
             if(!tableExists(String.valueOf(tableRequest.get("tableNumber")))){
                 return new APIGatewayProxyResponseEvent()
                         .withStatusCode(400)
