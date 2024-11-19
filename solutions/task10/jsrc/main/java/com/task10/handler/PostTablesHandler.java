@@ -26,7 +26,7 @@ public class PostTablesHandler implements RequestHandler<APIGatewayProxyRequestE
             tableDataMap.put("places", AttributeValue.builder().n(String.valueOf(tableRequest.get("places"))).build());
             tableDataMap.put("isVip", AttributeValue.builder().bool((Boolean) tableRequest.get("isVip")).build());
             if(tableRequest.has("minOrder"))
-                tableDataMap.put("minOrder", AttributeValue.builder().n(String.valueOf(tableRequest.get("number"))).build());
+                tableDataMap.put("minOrder", AttributeValue.builder().n(String.valueOf(tableRequest.get("minOrder"))).build());
 
             PutItemRequest putItemRequest = PutItemRequest.builder().tableName(ApiHandler.TABLES_TABLE_NAME).item(tableDataMap).build();
 
