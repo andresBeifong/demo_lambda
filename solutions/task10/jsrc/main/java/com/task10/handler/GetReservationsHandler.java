@@ -27,12 +27,12 @@ public class GetReservationsHandler implements RequestHandler<APIGatewayProxyReq
 
             for(Map<String, AttributeValue> item : items){
                 JSONObject tableJson = new JSONObject();
-                tableJson.put("tableNumber", item.get("tableNumber").getValueForField("N", Integer.class));
-                tableJson.put("clientName", item.get("clientName").getValueForField("S", String.class));
-                tableJson.put("phoneNumber", item.get("phoneNumber").getValueForField("S", String.class));
-                tableJson.put("date", item.get("date").getValueForField("S", String.class));
-                tableJson.put("slotTimeStart", item.get("slotTimeStart").getValueForField("S", String.class));
-                tableJson.put("slotTimeEnd", item.get("slotTimeEnd").getValueForField("S", String.class));
+                tableJson.put("tableNumber", Integer.parseInt(item.get("tableNumber").n()));
+                tableJson.put("clientName", item.get("clientName").s());
+                tableJson.put("phoneNumber", item.get("phoneNumber").s());
+                tableJson.put("date", item.get("date").s());
+                tableJson.put("slotTimeStart", item.get("slotTimeStart").s());
+                tableJson.put("slotTimeEnd", item.get("slotTimeEnd").s());
                 reservations.put(tableJson);
             }
             return new APIGatewayProxyResponseEvent()
