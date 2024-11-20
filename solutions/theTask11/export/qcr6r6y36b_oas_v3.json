@@ -17,9 +17,10 @@
   "paths": {
     "/reservations": {
       "get": {
+        "summary": "Retrieve a list of reservations",
         "responses": {
           "200": {
-            "description": "200 response",
+            "description": "The request has succeeded. The server has provided a list of reservations as specified in the response body.",
             "headers": {
               "Access-Control-Allow-Origin": {
                 "schema": {
@@ -30,10 +31,21 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Empty"
+                  "type": "object",
+                  "properties": {
+                    "reservations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Reservation"
+                      }
+                    }
+                  }
                 }
               }
             }
+          },
+          "400": {
+            "description": "There was an error in the request. The request was formed incorrectly and could not be processed."
           }
         },
         "security": [
@@ -57,9 +69,21 @@
         }
       },
       "post": {
+        "summary": "Create a new reservation",
+        "requestBody": {
+          "description": "Data needed to create a new reservation",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "200 response",
+            "description": "Reservation created successfully.",
             "headers": {
               "Access-Control-Allow-Origin": {
                 "schema": {
@@ -70,10 +94,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Empty"
+                  "$ref": "#/components/schemas/ReservationResponse"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request. Input data is invalid."
           }
         },
         "security": [
@@ -92,54 +119,6 @@
                 "method.response.header.Access-Control-Allow-Origin": "'*'"
               }
             }
-          },
-          "passthroughBehavior": "when_no_match"
-        }
-      },
-      "options": {
-        "responses": {
-          "200": {
-            "description": "200 response",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Empty"
-                }
-              }
-            }
-          }
-        },
-        "x-amazon-apigateway-integration": {
-          "type": "mock",
-          "responses": {
-            "default": {
-              "statusCode": "200",
-              "responseParameters": {
-                "method.response.header.Access-Control-Allow-Methods": "'*'",
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-                "method.response.header.Access-Control-Allow-Origin": "'*'"
-              }
-            }
-          },
-          "requestTemplates": {
-            "application/json": "{\"statusCode\": 200}"
           },
           "passthroughBehavior": "when_no_match"
         }
@@ -147,9 +126,10 @@
     },
     "/tables": {
       "get": {
+        "summary": "Retrieve a list of tables",
         "responses": {
           "200": {
-            "description": "200 response",
+            "description": "List of tables retrieved successfully.",
             "headers": {
               "Access-Control-Allow-Origin": {
                 "schema": {
@@ -160,7 +140,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Empty"
+                  "type": "object",
+                  "properties": {
+                    "tables": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Table"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -188,8 +176,20 @@
       },
       "post": {
         "responses": {
+          "summary": "Create a new table",
+          "requestBody": {
+            "description": "Data required to create a new table",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableRequest"
+                }
+              }
+            }
+          },
           "200": {
-            "description": "200 response",
+            "description": "Table created successfully.",
             "headers": {
               "Access-Control-Allow-Origin": {
                 "schema": {
@@ -200,10 +200,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Empty"
+                  "$ref": "#/components/schemas/TableResponse"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request. The request data is invalid."
           }
         },
         "security": [
@@ -222,54 +225,6 @@
                 "method.response.header.Access-Control-Allow-Origin": "'*'"
               }
             }
-          },
-          "passthroughBehavior": "when_no_match"
-        }
-      },
-      "options": {
-        "responses": {
-          "200": {
-            "description": "200 response",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Empty"
-                }
-              }
-            }
-          }
-        },
-        "x-amazon-apigateway-integration": {
-          "type": "mock",
-          "responses": {
-            "default": {
-              "statusCode": "200",
-              "responseParameters": {
-                "method.response.header.Access-Control-Allow-Methods": "'*'",
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-                "method.response.header.Access-Control-Allow-Origin": "'*'"
-              }
-            }
-          },
-          "requestTemplates": {
-            "application/json": "{\"statusCode\": 200}"
           },
           "passthroughBehavior": "when_no_match"
         }
@@ -277,23 +232,31 @@
     },
     "/signin": {
       "post": {
+        "summary": "User sign-in",
+        "description": "Authenticates a user with their email and password.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignInRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "200 response",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
+            "description": "The request has succeeded. The server has processed the sign-in request, and the provided credentials were valid. The response contains an access token, which will be used for subsequent authenticated requests.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Empty"
+                  "$ref": "#/components/schemas/SignInResponse"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request. There was an error in the request, such as missing or invalid parameters."
           }
         },
         "x-amazon-apigateway-integration": {
@@ -307,54 +270,6 @@
                 "method.response.header.Access-Control-Allow-Origin": "'*'"
               }
             }
-          },
-          "passthroughBehavior": "when_no_match"
-        }
-      },
-      "options": {
-        "responses": {
-          "200": {
-            "description": "200 response",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Empty"
-                }
-              }
-            }
-          }
-        },
-        "x-amazon-apigateway-integration": {
-          "type": "mock",
-          "responses": {
-            "default": {
-              "statusCode": "200",
-              "responseParameters": {
-                "method.response.header.Access-Control-Allow-Methods": "'*'",
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-                "method.response.header.Access-Control-Allow-Origin": "'*'"
-              }
-            }
-          },
-          "requestTemplates": {
-            "application/json": "{\"statusCode\": 200}"
           },
           "passthroughBehavior": "when_no_match"
         }
@@ -362,23 +277,24 @@
     },
     "/signup": {
       "post": {
-        "responses": {
-          "200": {
-            "description": "200 response",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Empty"
-                }
+        "summary": "User sign-up",
+        "description": "Registers a new user with the provided details.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUpRequest"
               }
             }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sign-up process is successful."
+          },
+          "400": {
+            "description": "Bad Request. There was an error in the request such as missing or invalid parameters."
           }
         },
         "x-amazon-apigateway-integration": {
@@ -395,63 +311,18 @@
           },
           "passthroughBehavior": "when_no_match"
         }
-      },
-      "options": {
-        "responses": {
-          "200": {
-            "description": "200 response",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Empty"
-                }
-              }
-            }
-          }
-        },
-        "x-amazon-apigateway-integration": {
-          "type": "mock",
-          "responses": {
-            "default": {
-              "statusCode": "200",
-              "responseParameters": {
-                "method.response.header.Access-Control-Allow-Methods": "'*'",
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-                "method.response.header.Access-Control-Allow-Origin": "'*'"
-              }
-            }
-          },
-          "requestTemplates": {
-            "application/json": "{\"statusCode\": 200}"
-          },
-          "passthroughBehavior": "when_no_match"
-        }
       }
     },
     "/tables/{tableId}": {
       "get": {
+        "summary": "Retrieve table information",
+        "description": "Fetches details of a specific table by tableId.",
         "parameters": [
           {
             "name": "tableId",
             "in": "path",
             "required": true,
+            "description": "The ID of the table to retrieve.",
             "schema": {
               "type": "string"
             }
@@ -459,21 +330,17 @@
         ],
         "responses": {
           "200": {
-            "description": "200 response",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
+            "description": "The request has succeeded. The server has processed the request and has returned information about the table specified by tableId. The response body contains details such as the table's ID, number, capacity, whether it's in the VIP hall, and optionally, the minimum order required to book it.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Empty"
+                  "$ref": "#/components/schemas/Table"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request. There was an error in the request, such as a missing or invalid tableId."
           }
         },
         "security": [
@@ -492,64 +359,6 @@
                 "method.response.header.Access-Control-Allow-Origin": "'*'"
               }
             }
-          },
-          "passthroughBehavior": "when_no_match"
-        }
-      },
-      "options": {
-        "parameters": [
-          {
-            "name": "tableId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "200 response",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Empty"
-                }
-              }
-            }
-          }
-        },
-        "x-amazon-apigateway-integration": {
-          "type": "mock",
-          "responses": {
-            "default": {
-              "statusCode": "200",
-              "responseParameters": {
-                "method.response.header.Access-Control-Allow-Methods": "'*'",
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-                "method.response.header.Access-Control-Allow-Origin": "'*'"
-              }
-            }
-          },
-          "requestTemplates": {
-            "application/json": "{\"statusCode\": 200}"
           },
           "passthroughBehavior": "when_no_match"
         }
@@ -561,6 +370,228 @@
       "Empty": {
         "title": "Empty Schema",
         "type": "object"
+      },
+      "Reservation": {
+        "title": "Reservation Schema",
+        "type": "object",
+        "properties": {
+          "tableNumber": {
+            "type": "number",
+            "description": "number of the table"
+          },
+          "clientName": {
+            "type": "string",
+            "description": "name of the client"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "reservation date in yyyy-MM-dd format"
+          },
+          "slotTimeStart": {
+            "type": "string",
+            "format": "time",
+            "pattern": "^[0-2][0-9]:[0-5][0-9]$",
+            "description": "start time of the slot in HH:MM format"
+          },
+          "slotTimeEnd": {
+            "type": "string",
+            "format": "time",
+            "pattern": "^[0-2][0-9]:[0-5][0-9]$",
+            "description": "end time of the slot in HH:MM format"
+          }
+        },
+        "required": [
+          "tableNumber",
+          "clientName",
+          "phoneNumber",
+          "date",
+          "slotTimeStart",
+          "slotTimeEnd"
+        ]
+      },
+      "Table": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique identifier for the table"
+          },
+          "number": {
+            "type": "number",
+            "description": "Number of the table"
+          },
+          "places": {
+            "type": "number",
+            "description": "Amount of people that can sit at the table"
+          },
+          "isVip": {
+            "type": "boolean",
+            "description": "Indicates if the table is in the VIP hall"
+          },
+          "minOrder": {
+            "type": "number",
+            "description": "Table deposit required to book it",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "places",
+          "isVip"
+        ]
+      },
+      "ReservationRequest": {
+        "type": "object",
+        "properties": {
+          "tableNumber": {
+            "type": "number",
+            "description": "Number of the table to reserve."
+          },
+          "clientName": {
+            "type": "string",
+            "description": "Name of the client making the reservation."
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Contact phone number for the reservation."
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the reservation in yyyy-MM-dd format."
+          },
+          "slotTimeStart": {
+            "type": "string",
+            "format": "time",
+            "description": "Start time of the reservation slot in 'HH:MM' format."
+          },
+          "slotTimeEnd": {
+            "type": "string",
+            "format": "time",
+            "description": "End time of the reservation slot in 'HH:MM' format."
+          }
+        },
+        "required": [
+          "tableNumber",
+          "clientName",
+          "phoneNumber",
+          "date",
+          "slotTimeStart",
+          "slotTimeEnd"
+        ]
+      },
+      "ReservationResponse": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Universally unique identifier for the reservation."
+          }
+        }
+      },
+      "TableRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique identifier for the table"
+          },
+          "number": {
+            "type": "number",
+            "description": "Number of the table"
+          },
+          "places": {
+            "type": "number",
+            "description": "Amount of people that can sit at the table"
+          },
+          "isVip": {
+            "type": "boolean",
+            "description": "Indicates if the table is in the VIP hall"
+          },
+          "minOrder": {
+            "type": "number",
+            "description": "Minimum order amount required to book the table",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "places",
+          "isVip"
+        ]
+      },
+      "TableResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID of the created table"
+          }
+        }
+      },
+      "SignUpRequest": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "First name of the user."
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name of the user."
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address of the user, needs to be valid."
+          },
+          "password": {
+            "type": "string",
+            "description": "Password for the account, which needs to be alphanumeric including any of '$%^*-_'. Minimum 12 characters.",
+            "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$%^*\\-_])[A-Za-z\\d$%^*\\-_]{12,}$"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "email",
+          "password"
+        ]
+      },
+      "SignInRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address of the user, needs to be valid."
+          },
+          "password": {
+            "type": "string",
+            "description": "Password for the account, which needs to be alphanumeric including any of '$%^*'. Minimum 12 characters.",
+            "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$%^*])[A-Za-z\\d$%^*]{12,}$"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "SignInResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Access token issued upon successful authentication that can be used for subsequent requests."
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -571,7 +602,9 @@
         "x-amazon-apigateway-authtype": "cognito_user_pools",
         "x-amazon-apigateway-authorizer": {
           "type": "cognito_user_pools",
-          "x-syndicate-cognito-userpool-names": ["${booking_userpool}"]
+          "x-syndicate-cognito-userpool-names": [
+            "${booking_userpool}"
+          ]
         }
       }
     }
