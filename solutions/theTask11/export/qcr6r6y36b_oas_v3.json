@@ -72,7 +72,6 @@
         "summary": "Create a new reservation",
         "requestBody": {
           "description": "Data needed to create a new reservation",
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -176,17 +175,17 @@
       },
       "post": {
         "summary": "Create a new table",
-        "responses": {
-          "requestBody": {
-            "description": "Data required to create a new table",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TableRequest"
-                }
+        "requestBody": {
+          "description": "Data required to create a new table",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TableRequest"
               }
             }
-          },
+          }
+        },
+        "responses": {
           "200": {
             "description": "Table created successfully.",
             "headers": {
@@ -234,7 +233,6 @@
         "summary": "User sign-in",
         "description": "Authenticates a user with their email and password.",
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -279,7 +277,6 @@
         "summary": "User sign-up",
         "description": "Registers a new user with the provided details.",
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
