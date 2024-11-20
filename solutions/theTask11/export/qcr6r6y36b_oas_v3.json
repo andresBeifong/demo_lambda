@@ -18,6 +18,7 @@
     "/reservations": {
       "get": {
         "summary": "Retrieve a list of reservations",
+        "description": "Fetches a list of all table reservations, providing details such as table numbers, client names, dates, and times for each reservation.",
         "responses": {
           "200": {
             "description": "The request has succeeded. The server has provided a list of reservations as specified in the response body.",
@@ -70,6 +71,7 @@
       },
       "post": {
         "summary": "Create a new reservation",
+        "description": "Creates a new table reservation with the provided details. This includes assigning a table number, client details, and reservation timing.",
         "requestBody": {
           "description": "Data needed to create a new reservation",
           "content": {
@@ -126,6 +128,7 @@
     "/tables": {
       "get": {
         "summary": "Retrieve a list of tables",
+        "description": "Fetches a list of all tables in the restaurant, including details such as table numbers, capacity, VIP status and minimum orders if applicable.",
         "responses": {
           "200": {
             "description": "List of tables retrieved successfully.",
@@ -175,6 +178,7 @@
       },
       "post": {
         "summary": "Create a new table",
+        "description": "Creates a new table with specified attributes such as number, places, VIP status, and an optional minimum order. This endpoint is used to add new tables to the restaurant layout.",
         "requestBody": {
           "description": "Data required to create a new table",
           "content": {
