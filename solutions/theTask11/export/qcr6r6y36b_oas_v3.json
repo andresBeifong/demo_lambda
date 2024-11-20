@@ -175,8 +175,8 @@
         }
       },
       "post": {
+        "summary": "Create a new table",
         "responses": {
-          "summary": "Create a new table",
           "requestBody": {
             "description": "Data required to create a new table",
             "content": {
