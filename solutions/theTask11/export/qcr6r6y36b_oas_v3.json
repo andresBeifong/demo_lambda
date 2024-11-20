@@ -244,6 +244,14 @@
         "responses": {
           "200": {
             "description": "The request has succeeded. The server has processed the sign-in request, and the provided credentials were valid. The response contains an access token, which will be used for subsequent authenticated requests.",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specifies the permitted origins",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -287,7 +295,15 @@
         },
         "responses": {
           "200": {
-            "description": "Sign-up process is successful."
+            "description": "Sign-up process is successful.",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specifies the permitted origins",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request. There was an error in the request such as missing or invalid parameters."
@@ -327,6 +343,14 @@
         "responses": {
           "200": {
             "description": "The request has succeeded. The server has processed the request and has returned information about the table specified by tableId. The response body contains details such as the table's ID, number, capacity, whether it's in the VIP hall, and optionally, the minimum order required to book it.",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specifies the permitted origins",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
