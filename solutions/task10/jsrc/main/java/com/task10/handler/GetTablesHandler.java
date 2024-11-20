@@ -28,7 +28,7 @@ public class GetTablesHandler  implements RequestHandler<APIGatewayProxyRequestE
             for(Map<String, AttributeValue> item : items){
                 JSONObject tableJson = new JSONObject();
                 tableJson.put("id", Integer.parseInt(item.get("id").n()));
-                tableJson.put("number", Integer.parseInt(item.get("number").n()));
+                tableJson.put("number", Integer.parseInt(item.get("tableNumber").n()));
                 tableJson.put("places", Integer.parseInt(item.get("places").n()));
                 tableJson.put("isVip", item.get("isVip").bool());
                 if(item.containsKey("minOrder"))

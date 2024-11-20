@@ -22,7 +22,7 @@ public class PostTablesHandler implements RequestHandler<APIGatewayProxyRequestE
             Map<String, AttributeValue> tableDataMap = new HashMap<>();
             int tableId = (int) tableRequest.get("id");
             tableDataMap.put("id", AttributeValue.builder().n(String.valueOf(tableId)).build());
-            tableDataMap.put("number", AttributeValue.builder().n(String.valueOf(tableRequest.get("number"))).build());
+            tableDataMap.put("tableNumber", AttributeValue.builder().n(String.valueOf(tableRequest.get("number"))).build());
             tableDataMap.put("places", AttributeValue.builder().n(String.valueOf(tableRequest.get("places"))).build());
             tableDataMap.put("isVip", AttributeValue.builder().bool((Boolean) tableRequest.get("isVip")).build());
             if(tableRequest.has("minOrder"))

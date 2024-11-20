@@ -86,7 +86,7 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
         QueryRequest queryRequest = QueryRequest.builder()
                 .tableName(ApiHandler.TABLES_TABLE_NAME)
                 .indexName("table_number_key_index")
-                .keyConditionExpression("number =:num")
+                .keyConditionExpression("tableNumber =:num")
                 .expressionAttributeValues(expressionAttributeValues)
                 .build();
 

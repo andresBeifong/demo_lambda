@@ -40,7 +40,7 @@ public class GetTableByIdHandler implements RequestHandler<APIGatewayProxyReques
             if(found != null && !found.isEmpty()) {
                 JSONObject tableJson = new JSONObject();
                 tableJson.put("id", Integer.parseInt(found.get("id").n()));
-                tableJson.put("number", Integer.parseInt(found.get("number").n()));
+                tableJson.put("number", Integer.parseInt(found.get("tableNumber").n()));
                 tableJson.put("places", Integer.parseInt(found.get("places").n()));
                 tableJson.put("isVip", found.get("isVip").bool());
                 if(found.containsKey("minOrder"))

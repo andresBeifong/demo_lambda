@@ -254,7 +254,7 @@
     "global_indexes": [
       {
         "name": "table_number_key_index",
-        "index_key_name": "number",
+        "index_key_name": "tableNumber",
         "index_key_type": "N"
       }
     ],
