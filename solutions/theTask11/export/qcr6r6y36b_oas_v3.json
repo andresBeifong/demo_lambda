@@ -179,7 +179,6 @@
           "summary": "Create a new table",
           "requestBody": {
             "description": "Data required to create a new table",
-            "required": true,
             "content": {
               "application/json": {
                 "schema": {
