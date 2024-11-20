@@ -80,16 +80,18 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
     }
 
     private boolean tableExists(String tableNumber) {
-        Map<String, AttributeValue> key = new HashMap<>();
-        key.put("id", AttributeValue.builder().n(tableNumber).build());
+        Map<String, AttributeValue> expressionAttributeValues = new HashMap<>();
+        expressionAttributeValues.put(":num", AttributeValue.builder().n(tableNumber).build());
 
-        GetItemRequest request = GetItemRequest.builder()
+        QueryRequest queryRequest = QueryRequest.builder()
                 .tableName(ApiHandler.TABLES_TABLE_NAME)
-                .key(key)
+                .indexName("table_number_key_index")
+                .keyConditionExpression("number =:num")
+                .expressionAttributeValues(expressionAttributeValues)
                 .build();
 
-        GetItemResponse result = ApiHandler.dynamoDB.getItem(request);
-        return result.item() != null && !result.item().isEmpty();
+        QueryResponse result = ApiHandler.dynamoDB.query(queryRequest);
+        return !result.items().isEmpty();
     }
 
     private boolean checkForOverlap(List<Map<String, AttributeValue>> existingReservations, String startTime, String endTime) {
